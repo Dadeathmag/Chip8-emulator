@@ -1,10 +1,63 @@
 #include <iostream>
 #include "Chip8.hpp"
 
+#define FONTSET_SIZE 80
+#define START_ADDRESS 0x200
+
+//Constructor
 Chip8::Chip8(){
-    std::cout << "Chip8 Initialized" << std::endl;    
+    std::cout << "Chip8 instance created" << std::endl;
+    reset();    
 }
 
-void Chip8::Cycle(int n){
+
+//Resets the Chip8 system to its initial state
+void Chip8::reset(){
+      
+    //Reset registers and memory
+    V.fill(0);
+    Memory.fill(0);
+    Stack.fill(0);
+    Video.fill(0);
+    Keys.fill(0);
+
+    opcode=0;
+    PC=START_ADDRESS;               //Program counter starts at 0x200
+    I=0;
+    SP=0;
+    delay_timer = 0;
+    sound_timer = 0;  
+
+
+    uint8_t font_set[FONTSET_SIZE]={
+        0xF0,0x90,0x90,0x90,0xF0,   //0
+        0x20,0x60,0x20,0x20,0x70,   //1
+        0xF0,0x10,0xF0,0x80,0xF0,   //2
+        0xF0,0x10,0xF0,0x10,0xF0,   //3
+        0x90,0x90,0xF0,0x10,0x10,   //4
+        0xF0,0x80,0xF0,0x10,0xF0,   //5
+        0xF0,0x80,0xF0,0x90,0xF0,   //6
+        0xF0,0x10,0x20,0x40,0x40,   //7
+        0xF0,0x90,0xF0,0x90,0xF0,   //8
+        0xF0,0x90,0xF0,0x10,0xF0,   //9
+        0xF0,0x90,0xF0,0x90,0x90,   //A
+        0xE0,0x90,0xE0,0x90,0xE0,   //B
+        0xF0,0x80,0x80,0x80,0xF0,   //C
+        0xE0,0x90,0x90,0x90,0xE0,   //D
+        0xF0,0x80,0xF0,0x80,0xF0,   //E
+        0xF0,0x80,0xF0,0x80,0x80,   //F
+    };
+
+    //from 0x050 is prefered by most
+    for(int i=0;i<FONTSET_SIZE;i++) Memory[i]=font_set[i];
+    std::cout << "Cpu reset" << std::endl;
+}
+
+
+void Chip8::loadROM(const char* filename){
+    std::cout << "Loading ROM: " << filename << std::endl;
+}
+
+void Chip8::cycle(int n){
     std::cout << "Cycle Executed: " << n << std::endl;
 }
