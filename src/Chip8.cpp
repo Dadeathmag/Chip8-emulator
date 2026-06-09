@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "Chip8.hpp"
 
 #define FONTSET_SIZE 80
@@ -48,16 +49,105 @@ void Chip8::reset(){
         0xF0,0x80,0xF0,0x80,0x80,   //F
     };
 
-    //from 0x050 is prefered by most
+    //from 0x050 is prefered by most here from 0x000
     for(int i=0;i<FONTSET_SIZE;i++) Memory[i]=font_set[i];
     std::cout << "Cpu reset" << std::endl;
 }
 
+/*
+void Chip8::loadROM(const char* filename){
+    std::cout << "Loading ROM: " << filename << std::endl;
+
+    FILE* rom = fopen(filename, "rb");                                  
+    if(rom == nullptr){
+        std::cerr << "Error: Could not open ROM file" << std::endl;
+        return;
+    }
+
+    // Read ROM data into memory
+
+    fseek(rom, 0, SEEK_END);
+    long rom_size = ftell(rom);                                     //determine size of rom
+    fseek(rom, 0, SEEK_SET);
+
+    if(rom_size>(4096-START_ADDRESS)){
+        std::cerr << "Error: ROM size exceeds available memory" << std::endl;
+        fclose(rom);
+        return;
+    }
+
+    fread(&Memory[START_ADDRESS], sizeof(uint8_t), rom_size, rom);
+    fclose(rom);
+}
+*/
 
 void Chip8::loadROM(const char* filename){
     std::cout << "Loading ROM: " << filename << std::endl;
+
+    std::ifstream rom(filename,std::ios::binary);
+    if(!rom){
+        std::cerr <<"failed to open ROM\n ";
+        return;
+    }
+    
+    rom.seekg(0,std::ios::end);
+    std::streamsize romSize = rom.tellg(); //determine size of rom
+    rom.seekg(0,std::ios::beg);
+
+    if (romSize > (4096 - START_ADDRESS))
+    {
+        std::cerr << "ROM too large\n";
+        return;
+    }
+
+    //Read ROM data into memory
+    rom.read(
+        reinterpret_cast<char*>(&Memory[START_ADDRESS]),
+        romSize
+    );
+
+    std::cout << "Loaded " << romSize << " bytes\n";
 }
 
-void Chip8::cycle(int n){
-    std::cout << "Cycle Executed: " << n << std::endl;
+void Chip8::cycle(){
+    //Fetch opcode and increment program counter
+    opcode =(Memory[PC]<<8u)|Memory[PC+1];
+    PC+=2;
+
+    //opcode fields
+    uint16_t nnn = opcode & 0x0FFFu;            //address
+    uint8_t  nn   = opcode & 0x00FFu;           //8 bit constant
+    uint8_t  n    = opcode & 0x000Fu;           //4 bit constant
+    uint8_t  x    = (opcode & 0x0F00u) >> 8u;   //register X
+    uint8_t  y    = (opcode & 0x00F0u) >> 4u;   //register Y
+
+    switch(opcode & 0xF000u){
+        // decode and execute 35 opcodes here
+        case 0x0000:
+            switch(opcode & 0x00FFu){
+                case 0x00E0:
+                    //CLS
+                    break;
+                case 0x00EE:
+                    //RET
+                    break;
+                default:  //0x0nnn
+                    //SYS addr ignored
+                    break;
+            }
+            break;
+        case 0x1000:
+            //JP addr
+            break;
+        case 0x2000:
+            //CALL addr
+            break;
+        case 0x3000:
+            
+
+        default:
+            std::cerr<< "Unknown opcode: " << std::hex << opcode << std::endl;
+    }
+
+    std::cout << "Cycle Executed" << std::endl;
 }

@@ -7,7 +7,7 @@ class Chip8{
         Chip8();
         void reset();
         void loadROM(const char* filename);
-        void cycle(int n);
+        void cycle();
     private:
     
         std::array<uint8_t, 16> V{};                        //16 8bit registers V0 - VE , VF - flag register
