@@ -32,4 +32,5 @@ class Chip8{
         uint8_t delay_timer{};
         uint8_t sound_timer{};
 
+        void unknownOpcode(uint16_t opcode);
 };
