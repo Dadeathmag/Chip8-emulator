@@ -28,9 +28,26 @@ class Chip8{
 
         uint16_t I{};                                       //16 bit index register
         
-        //timers
+        //Timers
         uint8_t delay_timer{};
         uint8_t sound_timer{};
 
-        void unknownOpcode(uint16_t opcode);
+        //Operations
+        void opUnknownOpcode(uint16_t opcode);
+        void opClearScreen();
+        void opReturn();
+        void opJump(uint16_t addr);
+        void opCall(uint16_t addr);
+        void opSkip(uint8_t x,uint8_t byte);
+        void opSkipNot(uint8_t x,uint8_t byte);
+        void opSkipReg(uint8_t x,uint8_t y);
+        void opLoad(uint8_t x,uint8_t byte);
+        void opAdd(uint8_t x,uint8_t byte);
+        void opLoadReg(uint8_t x,uint8_t y);
+        void opOR(uint8_t x,uint8_t y);
+        void opAND(uint8_t x,uint8_t y);
+        void opXOR(uint8_t x,uint8_t y);
+        void opAddCarry(uint8_t x,uint8_t y);
+        void opSub(uint8_t x,uint8_t y);
+        void opSHR(uint8_t x /*,uint8_t y*/);
 };

@@ -11,7 +11,6 @@ Chip8::Chip8(){
     reset();    
 }
 
-
 //Resets the Chip8 system to its initial state
 void Chip8::reset(){
       
@@ -118,9 +117,9 @@ void Chip8::cycle(){
                                                 //          ----   | XX |<==PC+2    
                                                 // opcode = XXXX   | XX |
     //opcode fields
-    const uint16_t nnn = opcode & 0x0FFFu;            //address
-    const uint8_t  nn   = opcode & 0x00FFu;           //byte
-    const uint8_t  n    = opcode & 0x000Fu;           //nibble
+    const uint16_t addr = opcode & 0x0FFFu;            //address
+    const uint8_t  byte   = opcode & 0x00FFu;           //byte
+    const uint8_t  nibble    = opcode & 0x000Fu;           //nibble
     const uint8_t  x    = (opcode & 0x0F00u) >> 8u;   //register X
     const uint8_t  y    = (opcode & 0x00F0u) >> 4u;   //register Y
 
@@ -129,64 +128,80 @@ void Chip8::cycle(){
         case 0x0000:
             switch(opcode & 0x00FFu){
                 case 0x00E0:
-                    //CLS
+                    //CLS: clear screen
+                    opClearScreen();
                     break;
                 case 0x00EE:
-                    //RET
+                    //RET: return from subroutine
+                    opReturn();
                     break;
                 default:  //0x0nnn
-                    //SYS addr ignored
-                    unknownOpcode(opcode);
+                    //SYS addr ignored: used by cosmac vip
+                    opUnknownOpcode(opcode);
                     break;
             }
             break;
         case 0x1000:
             //JP addr
+            opJump(addr);
             break;
         case 0x2000:
             //CALL addr
+            opCall(addr);
             break;
         case 0x3000:
             //SE Vx, byte
+            opSkip(x,byte);
             break;
         case 0x4000:
             //SNE Vx, byte
+            opSkipNot(x,byte);
             break;
         case 0x5000:
-            if (n == 0){
+            if (nibble == 0){
                 // SE Vx, Vy
+                opSkipReg(x,y);
             }else{
-                unknownOpcode(opcode);
+                opUnknownOpcode(opcode);
             }
             break;
         case 0x6000:
             //LD Vx, byte
+            opLoad(x,byte);
             break; 
         case 0x7000:
             //ADD Vx, byte
+            opAdd(x,byte);
             break;
         case 0x8000:
             switch(opcode & 0x000Fu){
                 case 0x0000:
                     //LD Vx,Vy
+                    opLoadReg(x,y);
                     break;
                 case 0x0001:
                     //OR Vx,Vy
+                    opOR(x,y);
                     break;
                 case 0x0002:
                     //AND Vx,Vy
+                    opAND(x,y);
                     break;
                 case 0x0003:
                     //XOR Vx,Vy
+                    opXOR(x,y);
                     break;
                 case 0x0004:
                     //ADD Vx,Vy
+                    opAddCarry(x,y);
                     break;
                 case 0x0005:
                     //SUB Vx,Vy
+                    opSub(x,y);
                     break;
                 case 0x0006:
                     //SHR Vx,Vy
+                    opSHR(x);
                     break;
                 case 0x0007:
                     //SUBN Vx,Vy
@@ -195,14 +210,14 @@ void Chip8::cycle(){
                     //SHL Vx,Vy
                     break;
                 default:
-                    unknownOpcode(opcode);
+                    opUnknownOpcode(opcode);
             }
             break;
         case 0x9000:
-            if (n == 0){
+            if (nibble == 0){
                 // SNE Vx, Vy
             }else{
-                unknownOpcode(opcode);
+                opUnknownOpcode(opcode);
             }
             break;
         case 0xA000:
@@ -226,7 +241,7 @@ void Chip8::cycle(){
                     //SKNP Vx
                     break;
                 default:
-                    unknownOpcode(opcode);
+                    opUnknownOpcode(opcode);
             }
             break;
         case 0xF000:
@@ -259,21 +274,92 @@ void Chip8::cycle(){
                     //LD Vx, [I]
                     break;
                 default:
-                    unknownOpcode(opcode);
+                    opUnknownOpcode(opcode);
             }
             break;
 
         default:
-            unknownOpcode(opcode);
+            opUnknownOpcode(opcode);
     }
 
     std::cout << "Cycle Executed" << std::endl;
 }
 
-void Chip8::unknownOpcode(uint16_t opcode)
-{
+void Chip8::opUnknownOpcode(uint16_t opcode){
     std::cerr << "Unknown opcode: 0x"
               << std::hex << opcode
               << std::dec
               << '\n';
+}
+
+void Chip8::opClearScreen(){
+    Video.fill(0);
+}
+
+void Chip8::opReturn(){
+    SP--;
+    PC = Stack[SP];
+}
+
+void Chip8::opJump(uint16_t addr){
+    PC=addr;
+}
+
+void Chip8::opCall(uint16_t addr){
+    Stack[SP]=PC;
+    SP++;
+    PC=addr;
+}
+
+void Chip8::opSkip(uint8_t x,uint8_t byte){
+    if(V[x]==byte) PC+=2;
+}
+
+void Chip8::opSkipNot(uint8_t x,uint8_t byte){
+    if(V[x]!=byte) PC+=2;
+}
+
+void Chip8::opSkipReg(uint8_t x,uint8_t y){
+    if(V[x]==V[y]) PC+=2;
+}
+
+void Chip8::opLoad(uint8_t x,uint8_t byte){
+    V[x]=byte;
+}
+
+void Chip8::opAdd(uint8_t x,uint8_t byte){
+    V[x]+=byte;
+}
+
+void Chip8::opLoadReg(uint8_t x,uint8_t y){
+    V[x]=V[y];
+}
+
+void Chip8::opOR(uint8_t x,uint8_t y){
+    V[x]|=V[y];
+}
+
+void Chip8::opAND(uint8_t x,uint8_t y){
+    V[x]&=V[y];
+}
+
+void Chip8::opXOR(uint8_t x,uint8_t y){
+    V[x]^=V[y];
+}
+
+void Chip8::opAddCarry(uint8_t x,uint8_t y){
+    uint16_t sum = V[x]+V[y];   //sum max would need 9 bits:255+255=512 
+    V[x]=sum & 0x00FF;          //lowest 8 bits of sum 
+    V[0xF]=(sum>0xFF);          //check overflow set flag
+}
+
+void Chip8::opSub(uint8_t x,uint8_t y){
+    V[0xF]=(V[x]>V[y]);
+    V[x]-=V[y];
+}
+
+void Chip8::opSHR(uint8_t x /*,uint8_t y*/){
+    //cosmac vip operates on y and store it on x
+    V[0xF]=V[x] & 0x01;         //sets flag to least significant bit
+    V[x]>>=1;                       
 }
