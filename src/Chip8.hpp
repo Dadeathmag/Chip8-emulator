@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <random>
 
 class Chip8{
     public:
@@ -32,6 +33,10 @@ class Chip8{
         uint8_t delay_timer{};
         uint8_t sound_timer{};
 
+        //Random
+        std::mt19937 rng{std::random_device{}()};
+        std::uniform_int_distribution<uint16_t> dist{0,255};
+
         //Operations
         void opUnknownOpcode(uint16_t opcode);
         void opClearScreen();
@@ -50,4 +55,11 @@ class Chip8{
         void opAddCarry(uint8_t x,uint8_t y);
         void opSub(uint8_t x,uint8_t y);
         void opSHR(uint8_t x /*,uint8_t y*/);
+        void opSubN(uint8_t x,uint8_t y);
+        void opSHL(uint8_t x /*,uint8_t y*/);
+        void opSkipNotReg(uint8_t x,uint8_t byte);
+        void opSetI(uint16_t addr);
+        void opJumpOffset(uint16_t addr);
+        void opSetRandom(uint8_t x,uint8_t byte);
+        void opDraw(uint8_t x,uint8_t y,uint8_t nibble);
 };

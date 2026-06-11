@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Chip8.hpp"
 
+#define FONT_START_ADDRESS 0x050        //standardly used by developers
 #define FONTSET_SIZE 80
 #define START_ADDRESS 0x200
 
@@ -48,8 +49,8 @@ void Chip8::reset(){
         0xF0,0x80,0xF0,0x80,0x80,   //F
     };
 
-    //from 0x050 is prefered by most here from 0x000
-    for(int i=0;i<FONTSET_SIZE;i++) Memory[i]=font_set[i];
+    //from 0x050 is prefered by most 
+    for(int i=0;i<FONTSET_SIZE;i++) Memory[FONT_START_ADDRESS + i]=font_set[i];
     std::cout << "Cpu reset" << std::endl;
 }
 
@@ -205,9 +206,11 @@ void Chip8::cycle(){
                     break;
                 case 0x0007:
                     //SUBN Vx,Vy
+                    opSubN(x,y);
                     break;
                 case 0x000E:
                     //SHL Vx,Vy
+                    opSHL(x);
                     break;
                 default:
                     opUnknownOpcode(opcode);
@@ -216,18 +219,22 @@ void Chip8::cycle(){
         case 0x9000:
             if (nibble == 0){
                 // SNE Vx, Vy
+                opSkipNotReg(x,y);
             }else{
                 opUnknownOpcode(opcode);
             }
             break;
         case 0xA000:
             //LD I,addr
+            opSetI(addr);
             break;
         case 0xB000:
-            //JP V0,addr
+            //JP V0,addr: Jump to addr+V0
+            opJumpOffset(addr);
             break;
         case 0xC000:
             //RND Vx,byte
+            opSetRandom(x,byte);
             break;
         case 0xD000:
             //DRW Vx,Vy,nibble
@@ -348,9 +355,10 @@ void Chip8::opXOR(uint8_t x,uint8_t y){
 }
 
 void Chip8::opAddCarry(uint8_t x,uint8_t y){
-    uint16_t sum = V[x]+V[y];   //sum max would need 9 bits:255+255=512 
-    V[x]=sum & 0x00FF;          //lowest 8 bits of sum 
-    V[0xF]=(sum>0xFF);          //check overflow set flag
+    uint16_t sum = V[x]+V[y];       //sum max would need 9 bits:255+255=510 
+    V[0xF]=(sum>0xFF);              //check overflow set flag
+    //V[x]=sum & 0x00FF;            //lowest 8 bits of sum 
+    V[x]=static_cast<uint8_t>(sum); //type cast to lowest 8bits
 }
 
 void Chip8::opSub(uint8_t x,uint8_t y){
@@ -362,4 +370,56 @@ void Chip8::opSHR(uint8_t x /*,uint8_t y*/){
     //cosmac vip operates on y and store it on x
     V[0xF]=V[x] & 0x01;         //sets flag to least significant bit
     V[x]>>=1;                       
+}
+
+void Chip8::opSubN(uint8_t x,uint8_t y){
+    V[0xF]=(V[y]>V[x]);
+    V[x]=V[y]-V[x];
+}
+
+void Chip8::opSHL(uint8_t x /*,uint8_t y*/){
+    V[0xF]=V[x] >> 7;         //sets flag to most significant bit
+    V[x]<<=1;
+}
+
+void Chip8::opSkipNotReg(uint8_t x,uint8_t y){
+    if(V[x]!=V[y])PC+=2;
+}
+
+void Chip8::opSetI(uint16_t addr){
+    I=addr;
+}
+
+void Chip8::opJumpOffset(uint16_t addr){
+    PC=addr + V[0x0];
+}
+
+void Chip8::opSetRandom(uint8_t x,uint8_t byte){
+    V[x]= static_cast<uint8_t>(dist(rng)) & byte;
+}
+
+void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
+
+    V[0xF]=0X00;                              //initialise flag to check collision
+
+    //read through sprite
+    for(int i=0;i<nibble;i++){
+        uint8_t byte = Memory[I+i];
+        for(int j=0;j<8;j++){
+            bool bit=(byte>>(7-j)) & 0x01;    //sprite pixel at (j,i)
+
+            //skips if sprite is zero
+            if(bit){
+                
+                //(x+j,y+i)=>on Screen coordinates
+                uint8_t screenX=(V[x]+j)%64;                            
+                uint8_t screenY=64*((V[y]+i)%32);                       
+                uint16_t index=screenX+screenY ;                        
+                                    
+                //collision detection and drawing
+                if(Video[index] && bit)V[0xF]=0x01;
+                Video[index]= Video[index] ^ bit;  
+            }
+        }
+    }
 }
