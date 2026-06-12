@@ -62,4 +62,15 @@ class Chip8{
         void opJumpOffset(uint16_t addr);
         void opSetRandom(uint8_t x,uint8_t byte);
         void opDraw(uint8_t x,uint8_t y,uint8_t nibble);
+        void opSkipKey(uint8_t x);
+        void opSkipKeyNot(uint8_t x);
+        void opGetDT(uint8_t x);
+        void opLoadKeyPress(uint8_t x);
+        void opSetDT(uint8_t x);
+        void opSetST(uint8_t x);
+        void opAddI(uint8_t x);
+        void opPointSprite(uint8_t x);
+        void opBCD(uint8_t x);
+        void opStoreMem(uint8_t x);
+        void opLoadMem(uint8_t x);
 };

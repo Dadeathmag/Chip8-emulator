@@ -238,14 +238,17 @@ void Chip8::cycle(){
             break;
         case 0xD000:
             //DRW Vx,Vy,nibble
+            opDraw(x,y,nibble);
             break;
         case 0xE000:
             switch(opcode & 0x00FFu){
                 case 0x009E:
                     //SKP Vx
+                    opSkipKey(x);
                     break;
                 case 0x00A1:
                     //SKNP Vx
+                    opSkipKeyNot(x);
                     break;
                 default:
                     opUnknownOpcode(opcode);
@@ -255,30 +258,39 @@ void Chip8::cycle(){
             switch(opcode & 0x00FF){
                 case 0x0007:
                     //LD Vx, DT
+                    opGetDT(x);
                     break;
                 case 0x000A:
                     //LD Vx, K
+                    opLoadKeyPress(x);
                     break;
                 case 0x0015:
                     //LD DT, Vx
+                    opSetDT(x);
                     break;
                 case 0x0018:
                     //LD ST, Vx
+                    opSetST(x);
                     break;
                 case 0x001E:
                     //ADD I, Vx
+                    opAddI(x);
                     break;
                 case 0x0029:
                     //LD F, Vx
+                    opPointSprite(x);
                     break;
                 case 0x0033:
                     //LD B, Vx
+                    opBCD(x);
                     break;
                 case 0x0055:
                     //LD [I], Vx
+                    opStoreMem(x);
                     break;
                 case 0x0065:
                     //LD Vx, [I]
+                    opLoadMem(x);
                     break;
                 default:
                     opUnknownOpcode(opcode);
@@ -421,5 +433,68 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
                 Video[index]= Video[index] ^ bit;  
             }
         }
+    }
+}
+
+void Chip8::opSkipKey(uint8_t x){
+    if(Keys[V[x]]==1) PC+=2;
+}
+
+void Chip8::opSkipKeyNot(uint8_t x){
+    if(Keys[V[x]]==0) PC+=2;
+}
+
+void Chip8::opGetDT(uint8_t x){
+    V[x]=delay_timer;
+}
+
+void Chip8::opLoadKeyPress(uint8_t x){
+    //will implement with edge detection 
+    for(uint8_t i=0x0;i<=0xF;i++){
+        if(Keys[i]){
+            V[x]=i;
+            return;
+        }
+    }
+    PC-=2;
+}
+
+void Chip8::opSetDT(uint8_t x){
+    delay_timer=V[x];
+}
+
+void Chip8::opSetST(uint8_t x){
+    sound_timer=V[x];
+}
+
+void Chip8::opAddI(uint8_t x){
+    I+=V[x];
+}
+
+void Chip8::opPointSprite(uint8_t x){
+    //loads pointer to sprite 0-f 
+    I=FONT_START_ADDRESS+(V[x]*5);
+}
+
+void Chip8::opBCD(uint8_t x){
+    uint8_t num = V[x];
+    Memory[I]=num/100;
+    num%=100;
+    Memory[I+1]=num/10;
+    num%=10;
+    Memory[I+2]=num;
+}
+
+void Chip8::opStoreMem(uint8_t x){
+    for(uint8_t i=0;i<=x;i++){
+        Memory[I+i]=V[i];
+        //for cosmac vip increment I
+    }
+}
+
+void Chip8::opLoadMem(uint8_t x){
+    for(uint8_t i=0;i<=x;i++){
+        V[i]=Memory[I+i];
+        //for cosmac vip increment I
     }
 }
