@@ -1,7 +1,9 @@
 #include <iostream>
 #include "Chip8.hpp"
 
+//debug
 void displayInTerminal(std::array <bool,64*32>);
+//debug
 
 int main()
 {
@@ -26,6 +28,7 @@ int main()
     return 0;
 }
 
+//debug
 void displayInTerminal(std::array <bool,64*32> Video){
         for(int y = 0; y < 32; y++)
     {
@@ -37,3 +40,4 @@ void displayInTerminal(std::array <bool,64*32> Video){
         std::cout << '\n';
     }
 }
+//debug
