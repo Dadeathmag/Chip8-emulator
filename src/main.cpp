@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Chip8.hpp"
+#include "core/Chip8.hpp"
 
 //debug
 void displayInTerminal(std::array <bool,64*32>);

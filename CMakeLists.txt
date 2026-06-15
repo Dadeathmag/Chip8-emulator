@@ -20,15 +20,16 @@ find_package(SDL2 REQUIRED)
 add_executable(
     chip8
     src/main.cpp
-    src/Chip8.cpp
-    src/Platform.cpp
+    src/core/Chip8.cpp
+    src/platform/PlatformSDL2.cpp
 )
 
 #specifies that the "src" directory should be included in the search path for header files when compiling the "chip8" target
 target_include_directories(
     chip8
     PRIVATE
-    src
+    src/core
+    src/platform
 )
 
 #specifies the libraries that the "chip8" target should link against
