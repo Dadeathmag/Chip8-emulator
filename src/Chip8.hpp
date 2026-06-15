@@ -9,6 +9,7 @@ class Chip8{
         void reset();
         void loadROM(const char* filename);
         void cycle();
+        std::array <bool,64*32> getVideo();
     private:
     
         std::array<uint8_t, 16> V{};                        //16 8bit registers V0 - VE , VF - flag register

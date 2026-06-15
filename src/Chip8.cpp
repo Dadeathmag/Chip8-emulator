@@ -498,3 +498,8 @@ void Chip8::opLoadMem(uint8_t x){
         //for cosmac vip increment I
     }
 }
+
+std::array <bool,64*32> Chip8::getVideo(){
+    return Video;
+    
+}
