@@ -10,6 +10,10 @@ class Chip8{
         void loadROM(const char* filename);
         void cycle();
         std::array <bool,64*32> getVideo();
+
+        //optimization flags 
+        bool drawflag;
+        bool soundflag;
     private:
     
         std::array<uint8_t, 16> V{};                        //16 8bit registers V0 - VE , VF - flag register
@@ -21,8 +25,6 @@ class Chip8{
         std::array <bool,64*32> Video{};                    //64x32 monochrome display
 
         std::array <bool, 16> Keys{};                       //16 key input
-        
-        uint16_t opcode{};                                  //16 bit opcode
 
         uint16_t PC{};                                      //16 bit program counter
 
@@ -33,6 +35,8 @@ class Chip8{
         //Timers
         uint8_t delay_timer{};
         uint8_t sound_timer{};
+
+        uint16_t opcode{};                                  //16 bit opcode
 
         //Random
         std::mt19937 rng{std::random_device{}()};

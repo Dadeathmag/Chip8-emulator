@@ -20,11 +20,16 @@ int main()
     chip8.loadROM(rom);
 
     int n = 0;
-    while(n < count){
+    while(true){
+
         chip8.cycle();
+        if(chip8.drawflag){
+            chip8.drawflag=false;
+            displayInTerminal(chip8.getVideo());
+        }
         n++;
     }
-    displayInTerminal(chip8.getVideo());
+    //displayInTerminal(chip8.getVideo());
     return 0;
 }
 
@@ -39,5 +44,11 @@ void displayInTerminal(std::array <bool,64*32> Video){
 
         std::cout << '\n';
     }
+    //std::cout << "\x1B[2J\x1B[H";
+    #ifdef _WIN32
+        std::system("cls");
+    #else
+        std::system("clear");
+    #endif
 }
 //debug

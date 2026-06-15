@@ -81,7 +81,8 @@ void Chip8::reset(){
     SP=0;
     delay_timer = 0;
     sound_timer = 0;  
-
+    drawflag=0;
+    soundflag=0;
 
     uint8_t font_set[FONTSET_SIZE]={
         0xF0,0x90,0x90,0x90,0xF0,   //0
@@ -392,7 +393,7 @@ void Chip8::cycle(){
             opUnknownOpcode(opcode);
     }
 
-    debugLog(cycleCount,opcode,instruction,PC,I);
+    //debugLog(cycleCount,opcode,instruction,PC,I);
 }
 
 std::array <bool,64*32> Chip8::getVideo(){
@@ -507,6 +508,7 @@ void Chip8::opSetRandom(uint8_t x,uint8_t byte){
 
 void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
 
+    drawflag=true;
     V[0xF]=0X00;                              //initialise flag to check collision
 
     //read through sprite
