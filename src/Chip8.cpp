@@ -6,6 +6,59 @@
 #define FONTSET_SIZE 80
 #define START_ADDRESS 0x200
 
+//debug
+int cycleCount=0;
+void debugLog(int cycle,uint16_t opcode,int instruction,uint16_t PC,uint16_t I){
+    std::string code;
+    switch(instruction){
+        case 1:  code = "CLS"; break;
+        case 2:  code = "RET"; break;
+        case 3:  code = "JP addr"; break;
+        case 4:  code = "CALL addr"; break;
+        case 5:  code = "SE Vx, byte"; break;
+        case 6:  code = "SNE Vx, byte"; break;
+        case 7:  code = "SE Vx, Vy"; break;
+        case 8:  code = "LD Vx, byte"; break;
+        case 9:  code = "ADD Vx, byte"; break;
+
+        case 10: code = "LD Vx, Vy"; break;
+        case 11: code = "OR Vx, Vy"; break;
+        case 12: code = "AND Vx, Vy"; break;
+        case 13: code = "XOR Vx, Vy"; break;
+        case 14: code = "ADD Vx, Vy"; break;
+        case 15: code = "SUB Vx, Vy"; break;
+        case 16: code = "SHR Vx"; break;
+        case 17: code = "SUBN Vx, Vy"; break;
+        case 18: code = "SHL Vx"; break;
+
+        case 19: code = "SNE Vx, Vy"; break;
+        case 20: code = "LD I, addr"; break;
+        case 21: code = "JP V0, addr"; break;
+        case 22: code = "RND Vx, byte"; break;
+        case 23: code = "DRW Vx, Vy, nibble"; break;
+
+        case 24: code = "SKP Vx"; break;
+        case 25: code = "SKNP Vx"; break;
+
+        case 26: code = "LD Vx, DT"; break;
+        case 27: code = "LD Vx, K"; break;
+        case 28: code = "LD DT, Vx"; break;
+        case 29: code = "LD ST, Vx"; break;
+        case 30: code = "ADD I, Vx"; break;
+        case 31: code = "LD F, Vx"; break;
+        case 32: code = "LD B, Vx"; break;
+        case 33: code = "LD [I], Vx"; break;
+        case 34: code = "LD Vx, [I]"; break;
+
+        default:
+            code = "UNKNOWN";
+            break;
+    }
+    std::cout<<"\ncount:"<<cycle<<" opcode:"<<std::hex << opcode<<"\ninstruction:"<<code<<"\nPC:"<<PC<<" I:"<<I<<std::dec<<std::endl;
+    cycleCount++;
+}
+//debug
+
 //Constructor
 Chip8::Chip8(){
     std::cout << "Chip8 instance created" << std::endl;
@@ -111,6 +164,10 @@ void Chip8::loadROM(const char* filename){
 
 void Chip8::cycle(){
 
+    //debug
+    int instruction=0;
+    //debug
+
     //Fetch opcode and increment program counter       
                                                 //                 Memory 
     opcode = (Memory[PC]<<8u)|Memory[PC+1];      //         XX00<==| XX |<==PC
@@ -131,10 +188,12 @@ void Chip8::cycle(){
                 case 0x00E0:
                     //CLS: clear screen
                     opClearScreen();
+                    instruction=1;
                     break;
                 case 0x00EE:
                     //RET: return from subroutine
                     opReturn();
+                    instruction=2;
                     break;
                 default:  //0x0nnn
                     //SYS addr ignored: used by cosmac vip
@@ -145,23 +204,28 @@ void Chip8::cycle(){
         case 0x1000:
             //JP addr
             opJump(addr);
+            instruction=3;
             break;
         case 0x2000:
             //CALL addr
             opCall(addr);
+            instruction=4;
             break;
         case 0x3000:
             //SE Vx, byte
             opSkip(x,byte);
+            instruction=5;
             break;
         case 0x4000:
             //SNE Vx, byte
             opSkipNot(x,byte);
+            instruction=6;
             break;
         case 0x5000:
             if (nibble == 0){
                 // SE Vx, Vy
                 opSkipReg(x,y);
+                instruction=7;
             }else{
                 opUnknownOpcode(opcode);
             }
@@ -169,48 +233,59 @@ void Chip8::cycle(){
         case 0x6000:
             //LD Vx, byte
             opLoad(x,byte);
+            instruction=8;
             break; 
         case 0x7000:
             //ADD Vx, byte
             opAdd(x,byte);
+            instruction=9;
             break;
         case 0x8000:
             switch(opcode & 0x000Fu){
                 case 0x0000:
                     //LD Vx,Vy
                     opLoadReg(x,y);
+                    instruction=10;
                     break;
                 case 0x0001:
                     //OR Vx,Vy
                     opOR(x,y);
+                    instruction=11;
                     break;
                 case 0x0002:
                     //AND Vx,Vy
                     opAND(x,y);
+                    instruction=12;
                     break;
                 case 0x0003:
                     //XOR Vx,Vy
                     opXOR(x,y);
+                    instruction=13;
                     break;
                 case 0x0004:
                     //ADD Vx,Vy
                     opAddCarry(x,y);
+                    instruction=14;
                     break;
                 case 0x0005:
                     //SUB Vx,Vy
                     opSub(x,y);
+                    instruction=15;
                     break;
                 case 0x0006:
                     //SHR Vx,Vy
                     opSHR(x);
+                    instruction=16;
                     break;
                 case 0x0007:
                     //SUBN Vx,Vy
                     opSubN(x,y);
+                    instruction=17;
                     break;
                 case 0x000E:
                     //SHL Vx,Vy
                     opSHL(x);
+                    instruction=18;
                     break;
                 default:
                     opUnknownOpcode(opcode);
@@ -220,6 +295,7 @@ void Chip8::cycle(){
             if (nibble == 0){
                 // SNE Vx, Vy
                 opSkipNotReg(x,y);
+                instruction=19;
             }else{
                 opUnknownOpcode(opcode);
             }
@@ -227,28 +303,34 @@ void Chip8::cycle(){
         case 0xA000:
             //LD I,addr
             opSetI(addr);
+            instruction=20;
             break;
         case 0xB000:
             //JP V0,addr: Jump to addr+V0
             opJumpOffset(addr);
+            instruction=21;
             break;
         case 0xC000:
             //RND Vx,byte
             opSetRandom(x,byte);
+            instruction=22;
             break;
         case 0xD000:
             //DRW Vx,Vy,nibble
             opDraw(x,y,nibble);
+            instruction=23;
             break;
         case 0xE000:
             switch(opcode & 0x00FFu){
                 case 0x009E:
                     //SKP Vx
                     opSkipKey(x);
+                    instruction=24;
                     break;
                 case 0x00A1:
                     //SKNP Vx
                     opSkipKeyNot(x);
+                    instruction=25;
                     break;
                 default:
                     opUnknownOpcode(opcode);
@@ -259,38 +341,47 @@ void Chip8::cycle(){
                 case 0x0007:
                     //LD Vx, DT
                     opGetDT(x);
+                    instruction=26;
                     break;
                 case 0x000A:
                     //LD Vx, K
                     opLoadKeyPress(x);
+                    instruction=27;
                     break;
                 case 0x0015:
                     //LD DT, Vx
                     opSetDT(x);
+                    instruction=28;
                     break;
                 case 0x0018:
                     //LD ST, Vx
                     opSetST(x);
+                    instruction=29;
                     break;
                 case 0x001E:
                     //ADD I, Vx
                     opAddI(x);
+                    instruction=30;
                     break;
                 case 0x0029:
                     //LD F, Vx
                     opPointSprite(x);
+                    instruction=31;
                     break;
                 case 0x0033:
                     //LD B, Vx
                     opBCD(x);
+                    instruction=32;
                     break;
                 case 0x0055:
                     //LD [I], Vx
                     opStoreMem(x);
+                    instruction=33;
                     break;
                 case 0x0065:
                     //LD Vx, [I]
                     opLoadMem(x);
+                    instruction=34;
                     break;
                 default:
                     opUnknownOpcode(opcode);
@@ -301,7 +392,11 @@ void Chip8::cycle(){
             opUnknownOpcode(opcode);
     }
 
-    std::cout << "Cycle Executed" << std::endl;
+    debugLog(cycleCount,opcode,instruction,PC,I);
+}
+
+std::array <bool,64*32> Chip8::getVideo(){
+    return Video;
 }
 
 void Chip8::opUnknownOpcode(uint16_t opcode){
@@ -425,8 +520,8 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
                 
                 //(x+j,y+i)=>on Screen coordinates
                 uint8_t screenX=(V[x]+j)%64;                            
-                uint8_t screenY=64*((V[y]+i)%32);                       
-                uint16_t index=screenX+screenY ;                        
+                uint8_t screenY=(V[y]+i)%32;                       
+                uint16_t index = screenY * 64 + screenX;                        
                                     
                 //collision detection and drawing
                 if(Video[index] && bit)V[0xF]=0x01;
@@ -499,7 +594,4 @@ void Chip8::opLoadMem(uint8_t x){
     }
 }
 
-std::array <bool,64*32> Chip8::getVideo(){
-    return Video;
-    
-}
+
