@@ -13,7 +13,9 @@ class Chip8{
 
         //optimization flags 
         bool drawflag;
+        bool delayflag;
         bool soundflag;
+
     private:
     
         std::array<uint8_t, 16> V{};                        //16 8bit registers V0 - VE , VF - flag register
@@ -37,6 +39,9 @@ class Chip8{
         uint8_t sound_timer{};
 
         uint16_t opcode{};                                  //16 bit opcode
+
+        void decrementDT();
+        void decrementST();
 
         //Random
         std::mt19937 rng{std::random_device{}()};

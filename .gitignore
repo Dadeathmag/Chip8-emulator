@@ -65,8 +65,12 @@ vcpkg_installed/
 *.dwo
 
 # test output & cache
+test*/
 Testing/
 .cache/
 
-#chip8-files
+#chip8-roms and directory
+roms-*/
 *.ch8
+
+.vscode/c_cpp_properties.json

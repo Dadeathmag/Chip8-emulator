@@ -1,5 +1,14 @@
 #include <iostream>
 #include "core/Chip8.hpp"
+#include "platform/PlatformSDL2.hpp"
+
+#define TITLE "CHIP-8-Emulator"
+#define WINDOWWIDTH 512
+#define WINDOWHEIGHT 256
+#define SCREENWIDTH 64
+#define SCREENHEIGHT 32
+
+
 
 //debug
 void displayInTerminal(std::array <bool,64*32>);
@@ -7,6 +16,8 @@ void displayInTerminal(std::array <bool,64*32>);
 
 int main()
 {
+    PlatformSDL2 sdl(TITLE,700,300,WINDOWWIDTH,WINDOWHEIGHT,SCREENWIDTH,SCREENHEIGHT);
+
     //debug
     std::cout << "CHIP-8 Emulator\n enter rom name to run:";
     char rom[20];
@@ -20,12 +31,12 @@ int main()
     chip8.loadROM(rom);
 
     int n = 0;
-    while(true){
+    while(/*n>count*/ true){
 
         chip8.cycle();
         if(chip8.drawflag){
             chip8.drawflag=false;
-            displayInTerminal(chip8.getVideo());
+            sdl.updateScreen(chip8.getVideo());
         }
         n++;
     }
@@ -35,10 +46,8 @@ int main()
 
 //debug
 void displayInTerminal(std::array <bool,64*32> Video){
-        for(int y = 0; y < 32; y++)
-    {
-        for(int x = 0; x < 64; x++)
-        {
+    for(int y = 0; y < 32; y++){
+        for(int x = 0; x < 64; x++){
             std::cout << (Video[y * 64 + x] ? '#' : '.');
         }
 

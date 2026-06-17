@@ -400,6 +400,23 @@ std::array <bool,64*32> Chip8::getVideo(){
     return Video;
 }
 
+void Chip8::decrementDT(){
+    //delay flag is set true in set DT op
+    if(delay_timer>0)
+        delay_timer--;
+    else
+        delayflag=false;
+    
+} 
+
+void Chip8::decrementST(){
+    //sound flag is set true in set ST op
+    if(sound_timer>0) 
+        sound_timer--;
+    else 
+        soundflag=false;
+}
+
 void Chip8::opUnknownOpcode(uint16_t opcode){
     std::cerr << "Unknown opcode: 0x"
               << std::hex << opcode
@@ -558,10 +575,14 @@ void Chip8::opLoadKeyPress(uint8_t x){
 
 void Chip8::opSetDT(uint8_t x){
     delay_timer=V[x];
+    //helper flag
+    delayflag=true;
 }
 
 void Chip8::opSetST(uint8_t x){
     sound_timer=V[x];
+    //helper flag
+    soundflag=true;
 }
 
 void Chip8::opAddI(uint8_t x){
