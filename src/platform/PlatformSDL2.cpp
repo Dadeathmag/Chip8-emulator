@@ -4,7 +4,7 @@
 PlatformSDL2::PlatformSDL2(const char *title, int x, int y, int window_width, int window_height, int screen_width, int screen_height){
     SDL_Init( SDL_INIT_EVERYTHING );
     window = SDL_CreateWindow(title,x,y,window_width,window_height, SDL_WINDOW_SHOWN );
-    renderer = SDL_CreateRenderer(window,NULL,0);
+    renderer = SDL_CreateRenderer(window,0,0);
     texture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, screen_width, screen_height);
     Pixels.fill(0);
 
