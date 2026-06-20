@@ -1,0 +1,159 @@
+# CHIP-8 Emulator
+
+A CHIP-8 emulator written in C++20 with an SDL2 front end. It runs `.ch8` ROMs at a configurable CPU speed, with a built-in toolbar for loading games, changing display scale and color palette, and adjusting emulation settings.
+
+## Requirements
+
+- **CMake** 3.16 or newer
+- **C++20** compiler (GCC, Clang, or MSVC)
+- **SDL2** development libraries
+
+### Install SDL2 (Linux / WSL)
+
+```bash
+# Debian / Ubuntu
+sudo apt update
+sudo apt install build-essential cmake libsdl2-dev
+
+# Fedora
+sudo dnf install cmake gcc-c++ SDL2-devel
+
+# Arch
+sudo pacman -S cmake gcc sdl2
+```
+
+## Build
+
+From the project root:
+
+```bash
+cmake -B build
+cmake --build build
+```
+
+Release build (optional):
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+Clean rebuild:
+
+```bash
+rm -rf build
+cmake -B build
+cmake --build build
+```
+
+The executable is written to `build/chip8`.
+
+## Run
+
+Place `.ch8` ROM files in a `roms/` directory next to the executable (or run from the project root so `roms/` resolves correctly):
+
+```bash
+./build/chip8
+```
+
+On startup, the emulator loads the first `.ch8` file found in `roms/` (sorted alphabetically). If no ROMs are present, the display shows **NO ROM LOADED** until you pick one from the toolbar.
+
+## Controls
+
+CHIP-8 uses a 4×4 keypad. This emulator maps it to the keyboard as follows:
+
+```
+┌───┬───┬───┬───┐
+│ 1 │ 2 │ 3 │ 4 │     1 2 3 4
+├───┼───┼───┼───┤     q w e r
+│ Q │ W │ E │ R │     a s d f
+├───┼───┼───┼───┤     z x c v
+│ A │ S │ D │ F │
+├───┼───┼───┼───┤
+│ Z │ X │ C │ V │
+└───┴───┴───┴───┘
+```
+
+| Key | CHIP-8 key |
+|-----|------------|
+| `1` | 1 |
+| `2` | 2 |
+| `3` | 3 |
+| `4` | C |
+| `Q` | 4 |
+| `W` | 5 |
+| `E` | 6 |
+| `R` | D |
+| `A` | 7 |
+| `S` | 8 |
+| `D` | 9 |
+| `F` | E |
+| `Z` | A |
+| `X` | 0 |
+| `C` | B |
+| `V` | F |
+
+Close the window or use the window manager quit shortcut to exit.
+
+## Toolbar
+
+The top bar provides emulator controls without leaving the window:
+
+| Control | Action |
+|---------|--------|
+| **LOAD** | Open the ROM picker (lists all `.ch8` files in `roms/`) |
+| **RESET** | Reload the current ROM from the beginning |
+| **CPU** + **SET** | Set CPU frequency (100–10000 Hz, default 1000). Click the field, type a value, then press **SET** or Enter |
+| **PAL** | Cycle display palettes: Amber, Green, Mono, LCD, Pink |
+| **DBG** | Toggle debug overlay |
+| **−** / **+** / scale label | Change display scale (8×, 10×, 12×, 16×, 20×, 24×) |
+| ROM label (right) | Shows the currently loaded ROM filename |
+
+### ROM picker shortcuts
+
+- **Click** a row to load that ROM
+- **Mouse wheel** to scroll the list
+- **Up / Down** arrow keys to scroll
+- **Escape** to close without loading
+
+## Project structure
+
+```
+chip8/
+├── CMakeLists.txt
+├── README.md
+├── roms/                  # Place .ch8 ROM files here
+├── src/
+│   ├── main.cpp           # Main loop and timing
+│   ├── core/
+│   │   ├── Chip8.hpp      # CPU, memory, opcodes
+│   │   └── Chip8.cpp
+│   └── platform/
+│       ├── PlatformSDL2.hpp   # SDL2 window, input, audio, UI
+│       ├── PlatformSDL2.cpp
+│       ├── BitmapFont.hpp     # Built-in bitmap font for UI
+│       └── BitmapFont.cpp
+└── build/                 # CMake output (generated)
+```
+
+## ROMs
+
+ROM files are not tracked in git (see `.gitignore`). Add your own `.ch8` files to `roms/`.
+
+Test ROMs and games are available from community collections, for example:
+
+- [Timendus/chip8-test-roms](https://github.com/Timendus/chip8-test-roms)
+- [chip8-test-roms by dmatik](https://github.com/dmatik/chip8-test-roms)
+
+Useful ROMs for verifying the emulator:
+
+| ROM | Purpose |
+|-----|---------|
+| `opcode.ch8` | Opcode coverage test |
+| `testsuite.ch8` | Extended test suite |
+| `Pong.ch8` | Simple game |
+| `IBM.ch8` | Classic CHIP-8 logo demo |
+
+## License
+
+See repository history for authorship. ROM copyrights belong to their respective authors.

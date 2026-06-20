@@ -22,6 +22,7 @@ add_executable(
     src/main.cpp
     src/core/Chip8.cpp
     src/platform/PlatformSDL2.cpp
+    src/platform/BitmapFont.cpp
 )
 
 #specifies that the "src" directory should be included in the search path for header files when compiling the "chip8" target

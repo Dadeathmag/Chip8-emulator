@@ -1,10 +1,17 @@
+// CHIP-8 CPU implementation: memory map, opcode dispatch, and instruction handlers.
+//
+// Memory layout:
+//   0x000–0x04F  reserved (font set loaded at 0x050)
+//   0x050–0x09F  built-in hex font (16 chars × 5 bytes)
+//   0x200–0xFFF  program ROM and runtime data
+
 #include <iostream>
 #include <fstream>
 #include "Chip8.hpp"
 
-#define FONT_START_ADDRESS 0x050        //standardly used by developers
-#define FONTSET_SIZE 80
-#define START_ADDRESS 0x200
+#define FONT_START_ADDRESS 0x050  // conventional location for the hex font
+#define FONTSET_SIZE 80           // 16 sprites × 5 bytes each
+#define START_ADDRESS 0x200       // programs load here
 #define DEFAULT_CPU_FREQUENCY 700
 
 //debug
@@ -400,6 +407,8 @@ void Chip8::cycle(){
     //debugLog(cycleCount,opcode,instruction,PC,I);
 }
 
+//acessor-mutator
+
 std::array <bool,64*32> Chip8::getVideo(){
     return Video;
 }
@@ -407,6 +416,8 @@ std::array <bool,64*32> Chip8::getVideo(){
 std::array <bool,16>& Chip8::getKeys(){
     return Keys;
 }
+
+//timers
 
 void Chip8::updateTimers(){
     decrementDT();
@@ -429,6 +440,9 @@ void Chip8::decrementST(){
     else 
         soundflag=false;
 }
+
+
+//operations
 
 void Chip8::opUnknownOpcode(uint16_t opcode){
     std::cerr << "Unknown opcode: 0x"
@@ -577,14 +591,14 @@ void Chip8::opGetDT(uint8_t x){
 }
 
 void Chip8::opLoadKeyPress(uint8_t x){
-    //will implement with edge detection 
+    // Blocking wait: if no key is down, re-fetch this opcode next cycle.
     for(uint8_t i=0x0;i<=0xF;i++){
         if(Keys[i]){
             V[x]=i;
             return;
         }
     }
-    PC-=2;
+    PC-=2; // rewind PC so FX0A is retried until a key is pressed
 }
 
 void Chip8::opSetDT(uint8_t x){

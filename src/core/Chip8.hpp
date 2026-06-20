@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <random>
 
+// CHIP-8 virtual machine: 4 KB RAM, 16 registers, 64x32 display, and a
+// fetch-decode-execute cycle. Platform code drives timing, input, and audio.
 class Chip8{
     public:
         Chip8();
@@ -15,11 +17,11 @@ class Chip8{
         std::array <bool,64*32> getVideo();
         std::array <bool,16>& getKeys();
 
-        //optimization flags 
-        bool drawflag;
-        bool delayflag;
-        bool soundflag;
-        int cpufrequency;
+        // Set by opcodes; read by the main loop / platform layer.
+        bool drawflag;   // true after CLS or DRW — screen needs redraw
+        bool delayflag;  // true while delay timer is running
+        bool soundflag;  // true while sound timer is non-zero
+        int cpufrequency; // overridden each frame from the UI (Hz)
 
     private:
     
