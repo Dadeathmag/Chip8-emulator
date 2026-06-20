@@ -2,6 +2,8 @@
 
 A CHIP-8 emulator written in C++20 with an SDL2 front end. It runs `.ch8` ROMs at a configurable CPU speed, with a built-in toolbar for loading games, changing display scale and color palette, and adjusting emulation settings.
 
+<img width="650" height="394" alt="chip8" src="https://github.com/user-attachments/assets/f84186ed-cdf7-47a7-9716-430d7530eb5e" />
+
 ## Requirements
 
 - **CMake** 3.16 or newer
