@@ -5,6 +5,7 @@
 #define FONT_START_ADDRESS 0x050        //standardly used by developers
 #define FONTSET_SIZE 80
 #define START_ADDRESS 0x200
+#define DEFAULT_CPU_FREQUENCY 700
 
 //debug
 int cycleCount=0;
@@ -62,7 +63,7 @@ void debugLog(int cycle,uint16_t opcode,int instruction,uint16_t PC,uint16_t I){
 //Constructor
 Chip8::Chip8(){
     std::cout << "Chip8 instance created" << std::endl;
-    reset();    
+    cpufrequency=DEFAULT_CPU_FREQUENCY;    
 }
 
 //Resets the Chip8 system to its initial state
@@ -136,6 +137,9 @@ void Chip8::loadROM(const char* filename){
 */
 
 void Chip8::loadROM(const char* filename){
+    //reset cpu first 
+    reset();
+
     std::cout << "Loading ROM: " << filename << std::endl;
 
     std::ifstream rom(filename,std::ios::binary);
@@ -400,6 +404,15 @@ std::array <bool,64*32> Chip8::getVideo(){
     return Video;
 }
 
+std::array <bool,16>& Chip8::getKeys(){
+    return Keys;
+}
+
+void Chip8::updateTimers(){
+    decrementDT();
+    decrementST();
+}
+
 void Chip8::decrementDT(){
     //delay flag is set true in set DT op
     if(delay_timer>0)
@@ -426,6 +439,7 @@ void Chip8::opUnknownOpcode(uint16_t opcode){
 
 void Chip8::opClearScreen(){
     Video.fill(0);
+    drawflag = true;
 }
 
 void Chip8::opReturn(){

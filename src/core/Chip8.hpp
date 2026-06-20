@@ -9,12 +9,17 @@ class Chip8{
         void reset();
         void loadROM(const char* filename);
         void cycle();
+        void updateTimers();
+
+        //accessors-mutators
         std::array <bool,64*32> getVideo();
+        std::array <bool,16>& getKeys();
 
         //optimization flags 
         bool drawflag;
         bool delayflag;
         bool soundflag;
+        int cpufrequency;
 
     private:
     
