@@ -71,5 +71,7 @@ Testing/
 
 #chip8-roms
 *.ch8
+roms*/
+*.txt
 
 .vscode/c_cpp_properties.json

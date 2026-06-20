@@ -4,7 +4,7 @@
 #include <array>
 #include <string>
 #include <vector>
-#include <SDL2/SDL.h>
+#include "SdlInclude.hpp"
 
 // Deferred action from the SDL event loop to the main emulation loop.
 struct UiCommand {

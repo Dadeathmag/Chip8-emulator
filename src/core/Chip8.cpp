@@ -544,7 +544,11 @@ void Chip8::opSetI(uint16_t addr){
 }
 
 void Chip8::opJumpOffset(uint16_t addr){
-    PC=addr + V[0x0];
+    PC = addr + V[0x0];
+    // Quirk: Some interpreters implement this as "BXNN" (jump to NNN + VX),
+    // where X is the high nibble of NNN. Many ROMs rely on this behavior.
+    //const uint8_t x = static_cast<uint8_t>((addr & 0x0F00u) >> 8u);
+    //PC = addr + V[x];
 }
 
 void Chip8::opSetRandom(uint8_t x,uint8_t byte){
@@ -556,24 +560,56 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
     drawflag=true;
     V[0xF]=0X00;                              //initialise flag to check collision
 
-    //read through sprite
-    for(int i=0;i<nibble;i++){
-        uint8_t byte = Memory[I+i];
-        for(int j=0;j<8;j++){
-            bool bit=(byte>>(7-j)) & 0x01;    //sprite pixel at (j,i)
+    // CHIP-8: DXYN draws an N-row sprite (each row is 8 pixels).
+    // Super-CHIP: DXY0 draws a 16x16 sprite (each row uses 2 bytes).
+    // Some ROMs (e.g. 1dcell) rely on the DXY0 behavior.
+    if(nibble == 0){
+        for(int i = 0; i < 16; i++){
+            const uint8_t leftByte  = Memory[I + static_cast<uint16_t>(i * 2)];
+            const uint8_t rightByte = Memory[I + static_cast<uint16_t>(i * 2 + 1)];
 
-            //skips if sprite is zero
-            if(bit){
-                
-                //(x+j,y+i)=>on Screen coordinates
-                uint8_t screenX=(V[x]+j)%64;                            
-                uint8_t screenY=(V[y]+i)%32;                       
-                uint16_t index = screenY * 64 + screenX;                        
-                                    
-                //collision detection and drawing
-                if(Video[index] && bit)V[0xF]=0x01;
-                Video[index]= Video[index] ^ bit;  
+            // Left 8 pixels
+            for(int j = 0; j < 8; j++){
+                const bool bit = (leftByte >> (7 - j)) & 0x01;
+                if(!bit) continue;
+
+                const uint8_t screenX = (V[x] + j) % 64;
+                const uint8_t screenY = (V[y] + i) % 32;
+                const uint16_t index = screenY * 64 + screenX;
+
+                if(Video[index] && bit) V[0xF] = 0x01; // collision (pixel flipped from 1->0)
+                Video[index] = Video[index] ^ bit;      // XOR draw
             }
+
+            // Right 8 pixels
+            for(int j = 0; j < 8; j++){
+                const bool bit = (rightByte >> (7 - j)) & 0x01;
+                if(!bit) continue;
+
+                const uint8_t screenX = (V[x] + 8 + j) % 64;
+                const uint8_t screenY = (V[y] + i) % 32;
+                const uint16_t index = screenY * 64 + screenX;
+
+                if(Video[index] && bit) V[0xF] = 0x01;
+                Video[index] = Video[index] ^ bit;
+            }
+        }
+        return;
+    }
+
+    // Standard CHIP-8: read N rows, 1 byte per row.
+    for(int i = 0; i < nibble; i++){
+        const uint8_t byte = Memory[I + static_cast<uint16_t>(i)];
+        for(int j = 0; j < 8; j++){
+            const bool bit = (byte >> (7 - j)) & 0x01; // sprite pixel at (x+j, y+i)
+            if(!bit) continue; // XORing with 0 changes nothing
+
+            const uint8_t screenX = (V[x] + j) % 64;
+            const uint8_t screenY = (V[y] + i) % 32;
+            const uint16_t index = screenY * 64 + screenX;
+
+            if(Video[index] && bit) V[0xF] = 0x01;
+            Video[index] = Video[index] ^ bit;
         }
     }
 }

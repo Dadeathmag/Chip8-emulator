@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include "SdlInclude.hpp"
 #include <cstdint>
 
 // Draw ASCII text using a built-in 5x7 bitmap font (no SDL_ttf dependency).

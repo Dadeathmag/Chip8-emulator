@@ -32,7 +32,10 @@ namespace {
     }
 }
 
-int main()
+#if defined(__WIN32__) && !defined(__EMSCRIPTEN__)
+extern "C"
+#endif
+int main(int /*argc*/, char* /*argv*/[])
 {
     PlatformSDL2 sdl(TITLE, 100, 100, SCREENWIDTH, SCREENHEIGHT, DEFAULT_SCALE);
 
