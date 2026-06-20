@@ -69,7 +69,7 @@ test*/
 Testing/
 .cache/
 
-#chip8-roms and directory
+#chip8-roms
 *.ch8
 
 .vscode/c_cpp_properties.json
