@@ -66,7 +66,7 @@ int main(int /*argc*/, char* /*argv*/[])
         cpuaccumulator += deltatime * static_cast<uint32_t>(chip8.cpufrequency);
         timeraccumulator += deltatime * 60;
 
-        sdl.handleInput(chip8.getKeys());
+        sdl.handleInput(chip8.getKeys()); //debouncing to implement
 
         // UI actions are queued by the platform layer and consumed here so
         // ROM loading/resetting never happens mid-input handling.

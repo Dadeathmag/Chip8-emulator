@@ -559,6 +559,7 @@ void PlatformSDL2::handleInput(std::array <bool,16>& keys){
                 if(event.type == SDL_KEYDOWN && showRomPicker && !cpuInputFocused){
                     const SDL_Rect listRect = romPickerListRect();
                     const int maxScroll = maxRomPickerScroll(ROM_PICKER_ROW_H, listRect.h);
+                    
                     if(event.key.keysym.sym == SDLK_UP){
                         romPickerScroll = std::max(0, romPickerScroll - ROM_PICKER_ROW_H);
                     }else if(event.key.keysym.sym == SDLK_DOWN){

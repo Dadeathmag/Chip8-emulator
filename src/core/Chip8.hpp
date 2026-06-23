@@ -71,12 +71,12 @@ class Chip8{
         void opXOR(uint8_t x,uint8_t y);
         void opAddCarry(uint8_t x,uint8_t y);
         void opSub(uint8_t x,uint8_t y);
-        void opSHR(uint8_t x /*,uint8_t y*/);
+        void opSHR(uint8_t x ,uint8_t y);
         void opSubN(uint8_t x,uint8_t y);
-        void opSHL(uint8_t x /*,uint8_t y*/);
+        void opSHL(uint8_t x ,uint8_t y);
         void opSkipNotReg(uint8_t x,uint8_t byte);
         void opSetI(uint16_t addr);
-        void opJumpOffset(uint16_t addr);
+        void opJumpOffset(uint16_t addr,uint8_t x);
         void opSetRandom(uint8_t x,uint8_t byte);
         void opDraw(uint8_t x,uint8_t y,uint8_t nibble);
         void opSkipKey(uint8_t x);

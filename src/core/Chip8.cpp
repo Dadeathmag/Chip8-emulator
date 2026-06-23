@@ -12,7 +12,15 @@
 #define FONT_START_ADDRESS 0x050  // conventional location for the hex font
 #define FONTSET_SIZE 80           // 16 sprites × 5 bytes each
 #define START_ADDRESS 0x200       // programs load here
-#define DEFAULT_CPU_FREQUENCY 700
+#define DEFAULT_CPU_FREQUENCY 700  
+
+//Quirks
+#define VF_RESET true
+#define MEMORY_INC true
+#define DISP_WAIT true // idu about this
+#define CLIPPING true
+#define SHIFTING false
+#define JUMP_WITH_OFFSET false
 
 //debug
 int cycleCount=0;
@@ -286,7 +294,7 @@ void Chip8::cycle(){
                     break;
                 case 0x0006:
                     //SHR Vx,Vy
-                    opSHR(x);
+                    opSHR(x,y);
                     instruction=16;
                     break;
                 case 0x0007:
@@ -296,7 +304,7 @@ void Chip8::cycle(){
                     break;
                 case 0x000E:
                     //SHL Vx,Vy
-                    opSHL(x);
+                    opSHL(x,y);
                     instruction=18;
                     break;
                 default:
@@ -319,7 +327,7 @@ void Chip8::cycle(){
             break;
         case 0xB000:
             //JP V0,addr: Jump to addr+V0
-            opJumpOffset(addr);
+            opJumpOffset(addr,x);
             instruction=21;
             break;
         case 0xC000:
@@ -497,14 +505,26 @@ void Chip8::opLoadReg(uint8_t x,uint8_t y){
 
 void Chip8::opOR(uint8_t x,uint8_t y){
     V[x]|=V[y];
+    //Quirk
+    #if VF_RESET
+        V[0xF]=0x0;
+    #endif
 }
 
 void Chip8::opAND(uint8_t x,uint8_t y){
     V[x]&=V[y];
+    //Quirk
+    #if VF_RESET
+        V[0xF]=0x0;
+    #endif
 }
 
 void Chip8::opXOR(uint8_t x,uint8_t y){
     V[x]^=V[y];
+    //Quirk
+    #if VF_RESET
+        V[0xF]=0x0;
+    #endif
 }
 
 void Chip8::opAddCarry(uint8_t x,uint8_t y){
@@ -519,20 +539,29 @@ void Chip8::opSub(uint8_t x,uint8_t y){
     V[x]-=V[y];
 }
 
-void Chip8::opSHR(uint8_t x /*,uint8_t y*/){
-    //cosmac vip operates on y and store it on x
+void Chip8::opSHR(uint8_t x ,uint8_t y){
+    //Quirk
+    #if !SHIFTING
+        V[x]=V[y];
+    #endif
     V[0xF]=V[x] & 0x01;         //sets flag to least significant bit
-    V[x]>>=1;                       
+    V[x]>>=1;    
+                       
 }
 
 void Chip8::opSubN(uint8_t x,uint8_t y){
-    V[0xF]=(V[y]>V[x]);
+    V[0xF]=(V[y]>=V[x]);
     V[x]=V[y]-V[x];
 }
 
-void Chip8::opSHL(uint8_t x /*,uint8_t y*/){
+void Chip8::opSHL(uint8_t x ,uint8_t y){
+    //Quirk
+    #if !SHIFTING
+        V[x]=V[y];
+    #endif
     V[0xF]=V[x] >> 7;         //sets flag to most significant bit
     V[x]<<=1;
+    
 }
 
 void Chip8::opSkipNotReg(uint8_t x,uint8_t y){
@@ -543,12 +572,13 @@ void Chip8::opSetI(uint16_t addr){
     I=addr;
 }
 
-void Chip8::opJumpOffset(uint16_t addr){
-    PC = addr + V[0x0];
-    // Quirk: Some interpreters implement this as "BXNN" (jump to NNN + VX),
-    // where X is the high nibble of NNN. Many ROMs rely on this behavior.
-    //const uint8_t x = static_cast<uint8_t>((addr & 0x0F00u) >> 8u);
-    //PC = addr + V[x];
+void Chip8::opJumpOffset(uint16_t addr,uint8_t x){
+    //Quirk
+    #if JUMP_WITH_OFFSET
+        PC = addr + V[x];
+    #else
+        PC = addr + V[0x0];
+    #endif
 }
 
 void Chip8::opSetRandom(uint8_t x,uint8_t byte){
@@ -559,7 +589,8 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
 
     drawflag=true;
     V[0xF]=0X00;                              //initialise flag to check collision
-
+    const uint8_t startX = V[x] % 64;
+    const uint8_t startY = V[y] % 32;
     // CHIP-8: DXYN draws an N-row sprite (each row is 8 pixels).
     // Super-CHIP: DXY0 draws a 16x16 sprite (each row uses 2 bytes).
     // Some ROMs (e.g. 1dcell) rely on the DXY0 behavior.
@@ -573,8 +604,12 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
                 const bool bit = (leftByte >> (7 - j)) & 0x01;
                 if(!bit) continue;
 
-                const uint8_t screenX = (V[x] + j) % 64;
-                const uint8_t screenY = (V[y] + i) % 32;
+                #if CLIPPING
+                    // If the sprite pixel is outside the screen, skip it.
+                    if((startX + j) >= 64 || (startY + i) >= 32) continue;
+                #endif
+                const uint8_t screenX = (startX + j) % 64;
+                const uint8_t screenY = (startY + i) % 32;
                 const uint16_t index = screenY * 64 + screenX;
 
                 if(Video[index] && bit) V[0xF] = 0x01; // collision (pixel flipped from 1->0)
@@ -586,8 +621,12 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
                 const bool bit = (rightByte >> (7 - j)) & 0x01;
                 if(!bit) continue;
 
-                const uint8_t screenX = (V[x] + 8 + j) % 64;
-                const uint8_t screenY = (V[y] + i) % 32;
+                #if CLIPPING
+                    // If the sprite pixel is outside the screen, skip it.
+                    if((startX + 8 + j) >= 64 || (startY + i) >= 32) continue;
+                #endif
+                const uint8_t screenX = (startX + 8 + j) % 64;
+                const uint8_t screenY = (startY + i) % 32;
                 const uint16_t index = screenY * 64 + screenX;
 
                 if(Video[index] && bit) V[0xF] = 0x01;
@@ -604,8 +643,14 @@ void Chip8::opDraw(uint8_t x,uint8_t y,uint8_t nibble){
             const bool bit = (byte >> (7 - j)) & 0x01; // sprite pixel at (x+j, y+i)
             if(!bit) continue; // XORing with 0 changes nothing
 
-            const uint8_t screenX = (V[x] + j) % 64;
-            const uint8_t screenY = (V[y] + i) % 32;
+            #if CLIPPING
+                // If the sprite pixel is outside the screen, skip it.
+                if((startX + j) >= 64 || (startY + i) >= 32) continue;
+            #endif
+
+            const uint8_t screenX = (startX + j) % 64;
+            const uint8_t screenY = (startY + i) % 32;
+
             const uint16_t index = screenY * 64 + screenX;
 
             if(Video[index] && bit) V[0xF] = 0x01;
@@ -669,16 +714,24 @@ void Chip8::opBCD(uint8_t x){
 
 void Chip8::opStoreMem(uint8_t x){
     for(uint8_t i=0;i<=x;i++){
-        Memory[I+i]=V[i];
-        //for cosmac vip increment I
+        //Quirk
+        #if MEMORY_INC
+            Memory[I]=V[i];
+            I++;
+        #else
+            Memory[I+i]=V[i];
+        #endif
     }
 }
 
 void Chip8::opLoadMem(uint8_t x){
     for(uint8_t i=0;i<=x;i++){
-        V[i]=Memory[I+i];
-        //for cosmac vip increment I
+        //Quirk
+        #if MEMORY_INC
+            V[i]=Memory[I];
+            I++;
+        #else
+            V[i]=Memory[I+i];
+        #endif
     }
 }
-
-

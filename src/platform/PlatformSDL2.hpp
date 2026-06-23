@@ -69,6 +69,7 @@ class PlatformSDL2{
         SDL_Texture* texture;
         SDL_Event event;
         SDL_AudioDeviceID audioDevice{};
+        
         bool beepActive{};
         int beepPhase{};
         int windowWidth{};
