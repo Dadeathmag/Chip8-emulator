@@ -18,11 +18,11 @@ beep.ch8
 
 <img width="612" height="360" alt="VID-20260624-WA0190" src="https://github.com/user-attachments/assets/8fea2f98-7ce2-48a1-bd87-06a54b23bbfe" />
 
-random.ch8
+tetris.ch8
 
 <img width="616" height="360" alt="VID-20260624-WA0187" src="https://github.com/user-attachments/assets/5764e82c-6542-4b53-9e87-96f2d1b5f3e2" />
 
-tetris.ch8
+random.ch8
 
 ## Requirements
 
