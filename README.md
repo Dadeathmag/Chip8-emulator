@@ -125,8 +125,7 @@ ROM files are not tracked in git (see `.gitignore`). Add your own `.ch8` files t
 
 Test ROMs and games are available from community collections, for example:
 
-- [Timendus/chip8-test-roms](https://github.com/Timendus/chip8-test-roms)
-- [chip8-test-roms by dmatik](https://github.com/dmatik/chip8-test-roms)
+- [Timendus/chip8-test-roms](https://github.com/Timendus/chip8-test-suite.git)
 
 Useful ROMs for verifying the emulator:
 
@@ -136,6 +135,9 @@ Useful ROMs for verifying the emulator:
 | `testsuite.ch8` | Extended test suite |
 | `Pong.ch8` | Simple game |
 | `IBM.ch8` | Classic CHIP-8 logo demo |
+
+## References 
+- [Cowgod's Chip-8 Technical Reference v1.0](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
 
 ## License
 
