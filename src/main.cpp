@@ -92,7 +92,6 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
 
-        chip8.setPrevKeys(chip8.getKeys());
         
         // Delay and sound timers always run at 60 Hz on real hardware.
         while(timeraccumulator >= 1000){
@@ -106,6 +105,7 @@ int main(int /*argc*/, char* /*argv*/[])
         if(renderaccumulator >= 16){ // ~60 FPS display refresh
             sdl.updateScreen(chip8.getVideo());
             renderaccumulator -= 16;
+            chip8.setPrevKeys(chip8.getKeys());
         }
     }
 
