@@ -65,35 +65,16 @@ On startup, the emulator loads the first `.ch8` file found in `roms/` (sorted al
 CHIP-8 uses a 4×4 keypad. This emulator maps it to the keyboard as follows:
 
 ```
-┌───┬───┬───┬───┐
-│ 1 │ 2 │ 3 │ 4 │     1 2 3 4
-├───┼───┼───┼───┤     q w e r
-│ Q │ W │ E │ R │     a s d f
-├───┼───┼───┼───┤     z x c v
-│ A │ S │ D │ F │
-├───┼───┼───┼───┤
-│ Z │ X │ C │ V │
-└───┴───┴───┴───┘
+┌───┬───┬───┬───┐      ┌───┬───┬───┬───┐
+│ 1 │ 2 │ 3 │ 4 │      │ 1 │ 2 │ 3 │ C │     
+├───┼───┼───┼───┤      ├───┼───┼───┼───┤ 
+│ Q │ W │ E │ R │      │ 4 │ 5 │ 6 │ D │     
+├───┼───┼───┼───┤ ===> ├───┼───┼───┼───┤     
+│ A │ S │ D │ F │      │ 7 │ 8 │ 9 │ E │
+├───┼───┼───┼───┤      ├───┼───┼───┼───┤
+│ Z │ X │ C │ V │      │ A │ 0 │ B │ F │
+└───┴───┴───┴───┘      └───┴───┴───┴───┘
 ```
-
-| Key | CHIP-8 key |
-|-----|------------|
-| `1` | 1 |
-| `2` | 2 |
-| `3` | 3 |
-| `4` | C |
-| `Q` | 4 |
-| `W` | 5 |
-| `E` | 6 |
-| `R` | D |
-| `A` | 7 |
-| `S` | 8 |
-| `D` | 9 |
-| `F` | E |
-| `Z` | A |
-| `X` | 0 |
-| `C` | B |
-| `V` | F |
 
 Close the window or use the window manager quit shortcut to exit.
 
