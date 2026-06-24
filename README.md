@@ -2,7 +2,22 @@
 
 A CHIP-8 emulator written in C++20 with an SDL2 front end. It runs `.ch8` ROMs at a configurable CPU speed, with a built-in toolbar for loading games, changing display scale and color palette, and adjusting emulation settings.
 
+## Media
+
 <img width="650" height="394" alt="chip8" src="https://github.com/user-attachments/assets/f84186ed-cdf7-47a7-9716-430d7530eb5e" />
+Pong.ch8
+
+<img width="778" height="458" alt="VID-20260624-WA0188" src="https://github.com/user-attachments/assets/15ad14b5-bbd5-4d12-ad45-3cd6271bf976" />
+Quirk-test by Timendus
+
+<img width="606" height="360" alt="VID-20260624-WA0189" src="https://github.com/user-attachments/assets/040a3113-0576-4c30-a306-cf9ee51d34a2" />
+beep.ch8
+
+<img width="612" height="360" alt="VID-20260624-WA0190" src="https://github.com/user-attachments/assets/8fea2f98-7ce2-48a1-bd87-06a54b23bbfe" />
+random.ch8
+
+<img width="616" height="360" alt="VID-20260624-WA0187" src="https://github.com/user-attachments/assets/5764e82c-6542-4b53-9e87-96f2d1b5f3e2" />
+tetris.ch8
 
 ## Requirements
 
