@@ -90,6 +90,7 @@ void Chip8::reset(){
     Stack.fill(0);
     Video.fill(0);
     Keys.fill(0);
+    PrevKeys.fill(0);
 
     opcode=0;
     PC=START_ADDRESS;               //Program counter starts at 0x200
@@ -425,6 +426,10 @@ std::array <bool,16>& Chip8::getKeys(){
     return Keys;
 }
 
+void Chip8::setPrevKeys(std::array <bool,16> Keys){
+    PrevKeys=Keys;
+}
+
 //timers
 
 void Chip8::updateTimers(){
@@ -674,7 +679,7 @@ void Chip8::opGetDT(uint8_t x){
 void Chip8::opLoadKeyPress(uint8_t x){
     // Blocking wait: if no key is down, re-fetch this opcode next cycle.
     for(uint8_t i=0x0;i<=0xF;i++){
-        if(Keys[i]){
+        if(Keys[i] && !PrevKeys[i]){
             V[x]=i;
             return;
         }

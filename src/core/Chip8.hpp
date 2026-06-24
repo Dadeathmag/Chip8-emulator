@@ -16,6 +16,7 @@ class Chip8{
         //accessors-mutators
         std::array <bool,64*32> getVideo();
         std::array <bool,16>& getKeys();
+        void setPrevKeys(std::array <bool, 16> Keys);
 
         // Set by opcodes; read by the main loop / platform layer.
         bool drawflag;   // true after CLS or DRW — screen needs redraw
@@ -34,6 +35,8 @@ class Chip8{
         std::array <bool,64*32> Video{};                    //64x32 monochrome display
 
         std::array <bool, 16> Keys{};                       //16 key input
+
+        std::array <bool, 16> PrevKeys{};                   //prev key state for edge detection  
 
         uint16_t PC{};                                      //16 bit program counter
 
